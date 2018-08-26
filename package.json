@@ -1,0 +1,22 @@
+{
+  "name": "now-play",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "https://github.com/marius-t/now-playing",
+  "dependencies": {
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
+    "react-scripts": "1.1.5",
+    "react-infinite-scroller": "1.2",
+    "twitter-node-client": "latest",
+    "gh-pages": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test — env=jsdom",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  }
+}
