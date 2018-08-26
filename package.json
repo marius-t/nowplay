@@ -2,7 +2,7 @@
   "name": "now-play",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://github.com/marius-t/nowplay",
+  "homepage": "https://marius-t.github.io/nowplay/",
   "dependencies": {
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
