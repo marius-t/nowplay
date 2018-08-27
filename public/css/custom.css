@@ -1,0 +1,21 @@
+.tweet-actions ul{
+    display: inline;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tweet-actions ul li{
+    display: inline;
+    margin-right: 15px;
+}
+
+.user-content {
+    clear: both;
+    margin-top: 70px;
+}
+
+.alias{
+    color: #585858;
+    font-size: 0.8;
+}

@@ -8,7 +8,11 @@
     "react-dom": "^16.4.2",
     "react-scripts": "1.1.5",
     "react-infinite-scroller": "1.2",
-    "twitter-node-client": "latest",
+    "axios": "latest",
+    "embed-video": "latest",
+    "socket.io-client": "latest",
+    "youtube-node": "latest",
+    "react-timeago": "latest",
     "gh-pages": "latest"
   },
   "scripts": {

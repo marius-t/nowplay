@@ -1,16 +1,29 @@
 import React, { Component } from 'react';
-import {Twitter} from 'twitter-node-client';
+import axios from 'axios';
+import Tweet from './Tweet.js';
+import io from 'socket.io-client';
+
+let socketClient = io('http://142.93.58.237:8080');
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      formError: false
+      loading: true,
+      formError: false,
+      tweets: [],
+      location: 'Detecting location ...',
+      lat: null,
+      long: null,
+      postMsg: null
     }
     this.saveTweet = this.saveTweet.bind(this);
+
+
   }
 
+  //Check tweet + post for twitter update
   saveTweet(e) {
     e.preventDefault();
     const 
@@ -19,25 +32,88 @@ class App extends Component {
     
     if( videoUrl && videoComment ) {
       this.setState({formError: false});
-      console.log('Post to twitter');
+      
+      axios({
+        method: 'post',
+        url: 'http://142.93.58.237:8080',
+        params: {
+          url: videoUrl,
+          comment: videoComment
+        }
+      })
+      .then( res => {
+        //If the tweet is posted with success: show message + clear form
+        if( res.data.status == 'success' ) {
+          this.setState({postMsg: res.data.message});
+          this.refs.videoUrl.value = this.refs.videoComment.value = "";
+        }
+      })
+      .catch( err => {
+        console.log(err);
+      })
+
     } else {
       this.setState({formError: true});
     }
   }
 
-  componentDidMount() {
-    const twitterData = {
-      "consumerKey": "CXVNsTDohsJaIxl0cjpuLKXYr",
-      "consumerSecret": "Y49dNi2NPN9vJaPS95QnRLslOqisEuC7v934lHOfN05cVjbtDB",
-      "accessToken": "2834545563-QYQqm8hnLPiU3eFyAD8SGtKhfIYW7gMp8fGh8Xd",
-      "accessTokenSecret": "SUquQt3XC2ve3IIa8JbwMa4bsRCpZSJuCVKYAXLUTDBBT",
-      "callBackUrl": ""
+  //Adding geolocation to componentWillMount - will trigger the location before the FE is rendered
+  componentWillMount() {
+    //Try to get users location
+    if( navigator.geolocation ) {
+      navigator.geolocation.getCurrentPosition((geoData) => {
+        const 
+          lat = geoData.coords.latitude,
+          long = geoData.coords.longitude;
+        axios({
+          method: 'get',
+          url: 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+long+'&sensor=false&key=AIzaSyBNeBzG4PcqPBiccISB22ajCsCgBuVxuoo&result_type=locality'
+        })
+        .then(res => {
+          if( res.data.results[0].formatted_address ) {
+            this.setState({location: res.data.results[0].formatted_address});
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
+
+        this.setState({
+          lat: lat,
+          long: long
+        });
+      });
     }
 
-    let tweet = new Twitter(twitterData);
+    socketClient.on('new-tweet', (data) => {
+      const twitterData = Object.assign([], this.state.tweets);
+      
+      console.log(twitterData);
 
-    let a = tweet.getSearch({'q':'#haiku','count': 10}, (e) => {console.log( 'error', e )}, (d) => {console.log('succes', d)});
-    console.log(a);
+      twitterData.unshift(data);
+      this.setState({tweets: twitterData});
+
+      console.log(this.state.tweets);
+    });
+  }
+
+  componentDidMount() {
+    axios({
+      method: 'get',
+      url: 'http://142.93.58.237:8080',
+    })
+    .then(res => {
+      //once the data has been loaded we hide the preloader
+      this.setState({loading: false});
+
+      if( Array.isArray(res.data.tweets) ) {
+        this.setState({tweets: res.data.tweets});
+      }
+
+    })
+    .catch(function (error) {
+      console.log( 'error', error );
+    })
   }
 
   render() {
@@ -45,22 +121,22 @@ class App extends Component {
       <div className="container">
         <div className="jumbotron jumbotron-fluid">
           <div className="container">
-            <h1 className="display-4">#nowplaying in .... </h1>
-            <p className="lead">This page shows #nowplaying tweets in .... that contain a youtube link. It also allows you to post a #nowplaying tweet with a YouTube link.</p>
+            <h1 className="display-4">#nowplaying in {this.state.location} </h1>
+            <p className="lead">This page shows #nowplaying tweets in {this.state.location} that contain a youtube link. It also allows you to post a #nowplaying tweet with a YouTube link.</p>
           </div>
         </div>
 
         <div className="row mt-3 mb-3">
             <form className="form-inline col-12" onSubmit={this.saveTweet}>
-              <div className="form-group">
+              <div className="form-group mx-5">
                 <label htmlFor="videoUrl">Video URL:</label>
                 <input type="text" className="form-control" ref="videoUrl" id="videoUrl" placeholder="http://youtube.com/" />
               </div>
-              <div className="form-group">
+              <div className="form-group mx-5">
                 <label htmlFor="comment">Comment:</label>
                 <input type="text" className="form-control" ref="videoComment" id="comment" placeholder="Comment" />
               </div>
-              <button type="submit" className="btn btn-primary"><i className="fa fa-twitter" aria-hidden="true"></i> Tweet to #nowplaying</button>
+              <button type="submit" className="mx-5 btn btn-primary"><i className="fa fa-twitter" aria-hidden="true"></i> Tweet to #nowplaying</button>
             </form>
             {
               this.state.formError ?
@@ -70,35 +146,30 @@ class App extends Component {
             }
         </div>
 
-        <div className="row">
-          <h3 className="col-12">Some video title</h3>
-          <div className="col-6">
-            <iframe width="100%" src="https://www.youtube.com/embed/eff7CY79rMU" frameBorder="0" allow="autoplay; encrypted-media" allowFullScreen></iframe>
-          </div>
-          <div className="col-6">
-            <div className="user-info">
-              <img src="https://via.placeholder.com/48x48" className="rounded-circle"/>
-              <div className="user-name">
-                <span className="name">some name</span>
-                <span className="alias">@sometest</span>
-              </div>
-              <div className="twitter-logo">logo</div>
-            </div>
+        {
+          this.state.postMsg ?
+            <span>{this.state.postMsg}</span>
+          :
+            ''
+        }
 
-            <div className="user-content">Some test tweet body</div>
+        {/* We are adding a preloader. Since the data is loaded on display we know the preloader is needed */}
+        {
+          this.state.loading ?
+            <div className="loading">Loading tweets for #nowplaying ...</div>
+          :
+            ''
+        }
 
-            <div className="user-action">
-              <div className="tweet-date">2 hours ago</div>
-              <div className="tweet-actions">
-                <ul>
-                  <li><a href="#">r</a></li>
-                  <li><a href="#">rr</a></li>
-                  <li><a href="#">f</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* If we don't have the preloader the data has been loaded but there are no tweets */}
+        {
+          this.state.tweets.length === 0 && this.state.loading === false ?
+            <div className="no-tweets">No tweets found for now playing</div>
+          :
+            ''
+        }
+
+        <Tweet {...this.state}/>
 
       </div>
     );
