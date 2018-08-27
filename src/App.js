@@ -3,7 +3,7 @@ import axios from 'axios';
 import Tweet from './Tweet.js';
 import io from 'socket.io-client';
 
-let socketClient = io('http://142.93.58.237:8080');
+let socketClient = io('https://domaincook.com/');
 
 class App extends Component {
   constructor(props) {
@@ -35,7 +35,7 @@ class App extends Component {
       
       axios({
         method: 'post',
-        url: 'http://142.93.58.237:8080',
+        url: 'https://domaincook.com/',
         params: {
           url: videoUrl,
           comment: videoComment
@@ -100,7 +100,7 @@ class App extends Component {
   componentDidMount() {
     axios({
       method: 'get',
-      url: 'http://142.93.58.237:8080',
+      url: 'https://domaincook.com/',
     })
     .then(res => {
       //once the data has been loaded we hide the preloader
