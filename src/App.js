@@ -67,7 +67,7 @@ class App extends Component {
           long = geoData.coords.longitude;
         axios({
           method: 'get',
-          url: 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+long+'&sensor=false&key=AIzaSyBNeBzG4PcqPBiccISB22ajCsCgBuVxuoo&result_type=locality'
+          url: 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+long+'&sensor=false&key=xxxx&result_type=locality'
         })
         .then(res => {
           if( res.data.results[0].formatted_address ) {
