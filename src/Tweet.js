@@ -4,7 +4,7 @@ import YouTube from 'youtube-node';
 import TimeAgo from 'react-timeago';
 
 let youTube = new YouTube();
-youTube.setKey('AIzaSyC-D8N4quEnwh00Gt_OyaAkPG50mvdFEto');
+youTube.setKey('XXXXX');
 
 class Tweet extends Component {
 
